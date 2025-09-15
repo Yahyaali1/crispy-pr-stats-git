@@ -32,19 +32,31 @@ For each pull request in the repository, the following data points must be colle
 - **Field Name**: `comments_timestamps`
 - **Data Type**: Array of objects containing timestamp and comment metadata
 - **Description**: All comment timestamps including review comments, issue comments, and inline code comments
+- **Should summarize**: the count of comments from non Author of PR
 - **GitHub API Source**: 
   - Issue comments API
   - Review comments API
   - Pull request reviews API
 - **Structure**:
   ```json
+  { total_comments: 12,
+    comments: [
   {
     "timestamp": "2024-01-15T10:30:00Z",
     "type": "review_comment|issue_comment|review_summary",
     "author": "username",
     "comment_id": "123456789"
+  }]
   }
   ```
+#### 5. Review Given
+- **Field Name**: `review_given_timestamp`
+- **Data Type**: ISO 8601 timestamp
+- **Description**: Timestamp when the first substantive review was provided (not just approval)
+- **GitHub API Source**: Reviews API filtering for reviews with body content or line comments
+- **Special Cases**: 
+  - Distinguish between approval-only reviews and reviews with feedback
+  - Include "REQUEST_CHANGES" and "COMMENT" review types
 
 #### 4. Update Timestamps
 - **Field Name**: `update_timestamps`
@@ -56,15 +68,6 @@ For each pull request in the repository, the following data points must be colle
 - **Special Cases**: 
   - Force pushes: Include all push events
   - Merge commits: Exclude merge commits from main/master branch
-
-#### 5. Review Given
-- **Field Name**: `review_given_timestamp`
-- **Data Type**: ISO 8601 timestamp
-- **Description**: Timestamp when the first substantive review was provided (not just approval)
-- **GitHub API Source**: Reviews API filtering for reviews with body content or line comments
-- **Special Cases**: 
-  - Distinguish between approval-only reviews and reviews with feedback
-  - Include "REQUEST_CHANGES" and "COMMENT" review types
 
 #### 6. PR Merge
 - **Field Name**: `pr_merge_timestamp`
@@ -202,31 +205,3 @@ generator = PRStatsGenerator(token="github_token")
 stats = generator.generate_stats("owner/repo-name")
 generator.export_csv(stats, "pr_stats.csv")
 ```
-
-## Security Considerations
-
-### Data Privacy
-- Sanitize sensitive information from comments
-- Respect repository privacy settings
-- Implement proper access controls
-- Consider GDPR compliance for EU users
-
-### Token Security
-- Store GitHub tokens securely
-- Implement token rotation
-- Use environment variables for token storage
-- Audit token usage and permissions
-
-## Monitoring and Reporting
-
-### Metrics to Track
-- API request count and rate limit usage
-- Processing time per repository
-- Error rates and types
-- Data freshness and accuracy
-
-### Alerts
-- API rate limit approaching
-- Authentication failures
-- Data processing errors
-- Unusual patterns in PR statistics
